@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>✨ Calculadora OTACÍLIO | Relógio Digital</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+  body {
+    background: linear-gradient(135deg, #0a0f0f 0%, #0c1414 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 20px;
+    position: relative;
+  }
+
+  /* efeito de brilho ambiente */
+  body::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(0,255,136,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .calculadora {
+    background: rgba(12, 18, 22, 0.85);
+    backdrop-filter: blur(16px);
+    border-radius: 2.5rem;
+    padding: 1.8rem;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 255, 136, 0.2), 0 8px 20px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 440px;
+    transition: all 0.3s ease;
+  }
+
+  /* relógio digital */
+  .clock-container {
+    text-align: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+  }
+
+  .digital-clock {
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #88ffcc, #00ffaa);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 8px rgba(0,255,136,0.3);
+    letter-spacing: 3px;
+  }
+
+  /* saudação abaixo do relógio */
+  .greeting-container {
+    text-align: center;
+    margin-bottom: 1.2rem;
+  }
+
+  .greeting {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #aaffcc;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 4px rgba(0,255,136,0.3);
+  }
+
+  /* display principal */
+  .display {
+    background: #05100b;
+    color: #00ffcc;
+    font-size: 2.8rem;
+    font-family: 'Courier New', 'Fira Code', monospace;
+    font-weight: 600;
+    padding: 24px 20px;
+    border-radius: 1.8rem;
+    text-align: right;
+    min-height: 110px;
+    word-break: break-word;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    margin: 0 0 25px 0;
+    box-shadow: inset 0 0 20px rgba(0,255,136,0.15), 0 6px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0, 255, 136, 0.4);
+    letter-spacing: 1px;
+    transition: 0.2s ease;
+    line-height: 1.2;
+  }
+
+  /* modo descanso com nome OTACÍLIO - UMA ÚNICA LINHA, TAMANHO DO VISOR */
+  .display.idle-mode {
+    color: #88ffaa;
+    text-shadow: 0 0 8px #00ff88, 0 0 4px #00aa55;
+    font-style: normal;
+    font-weight: 800;
+    font-size: 2.4rem;
+    letter-spacing: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Segoe UI', 'Poppins', 'Orbitron', monospace;
+    white-space: nowrap;
+    overflow-x: hidden;
+    padding: 24px 12px;
+  }
+
+  @keyframes idleGlow {
+    0%, 100% { text-shadow: 0 0 2px #00ff88, 0 0 6px #00aa55; }
+    50% { text-shadow: 0 0 16px #00ff88, 0 0 8px #00ff88; }
+  }
+
+  .display.idle-mode {
+    animation: idleGlow 2.5s ease-in-out infinite;
+  }
+
+  /* grid de botões - apenas operações simples */
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  button {
+    background: rgba(20, 28, 32, 0.9);
+    border: none;
+    padding: 18px 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    font-family: 'Segoe UI', 'Inter', system-ui;
+    border-radius: 1.5rem;
+    color: #d0ffea;
+    cursor: pointer;
+    transition: 0.1s linear;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 255, 136, 0.25);
+  }
+
+  button:active {
+    transform: scale(0.94);
+    background: #00ffaa;
+    color: #021007;
+    box-shadow: 0 0 16px #00ff88;
+    border-color: #00ff88;
+  }
+
+  /* operadores com destaque */
+  .operator {
+    background: rgba(0, 40, 25, 0.85);
+    color: #7effb3;
+    font-size: 1.6rem;
+    border-color: rgba(0, 255, 136, 0.5);
+  }
+
+  .equal {
+    background: linear-gradient(135deg, #00cc77, #00aa55);
+    color: #000;
+    font-weight: bold;
+    font-size: 1.8rem;
+    box-shadow: 0 0 12px #00ff88;
+    border: none;
+    text-shadow: 0 0 3px rgba(255,255,255,0.5);
+  }
+
+  .clear {
+    background: rgba(50, 20, 20, 0.9);
+    color: #ff9f8a;
+    border-color: #ff6655aa;
+  }
+
+  /* responsivo */
+  @media (max-width: 480px) {
+    .calculadora {
+      padding: 1.2rem;
+    }
+    .buttons {
+      gap: 8px;
+    }
+    button {
+      padding: 14px 0;
+      font-size: 1.2rem;
+    }
+    .display {
+      font-size: 2.2rem;
+      padding: 18px;
+    }
+    .display.idle-mode {
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      padding: 18px 8px;
+    }
+    .digital-clock {
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+    }
+    .greeting {
+      font-size: 0.95rem;
+    }
+  }
+
+  /* rodapé minimalista */
+  .footer-note {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.7rem;
+    color: #2a6b4e;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculadora">
+  <!-- Relógio digital -->
+  <div class="clock-container">
+    <div class="digital-clock" id="digitalClock">--:--:--</div>
+  </div>
+  
+  <!-- Saudação (Bom dia/tarde/noite) -->
+  <div class="greeting-container">
+    <div class="greeting" id="greeting">🌤️ Carregando...</div>
+  </div>
+  
+  <div class="display" id="display">0</div>
+
+  <div class="buttons">
+    <!-- Linha 1: Limpeza e operadores -->
+    <button class="clear" onclick="clearDisplay()">AC</button>
+    <button class="operator" onclick="append('/')">÷</button>
+    <button class="operator" onclick="append('*')">×</button>
+    <button class="clear" onclick="backspace()">⌫</button>
+
+    <!-- Linha 2: 7 8 9 - -->
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button class="operator" onclick="append('-')">−</button>
+
+    <!-- Linha 3: 4 5 6 + -->
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button class="operator" onclick="append('+')">+</button>
+
+    <!-- Linha 4: 1 2 3 = -->
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button class="equal" onclick="calculate()">=</button>
+
+    <!-- Linha 5: 0 . 00 e espaço vazio -->
+    <button onclick="append('0')">0</button>
+    <button onclick="append('.')">.</button>
+    <button onclick="append('00')">00</button>
+    <div></div>
+  </div>
+  <div class="footer-note">✦ modo descanso: OTACÍLIO ✦</div>
+</div>
+
+<script>
+  const displayElem = document.getElementById('display');
+  let idleTimeout = null;
+  let isIdle = false;
+  let normalDisplayValue = '0';
+  const IDLE_DELAY = 4000; // 4 segundos sem interação ativa o modo descanso
+
+  // ========== RELÓGIO DIGITAL ==========
+  function updateDigitalClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    document.getElementById('digitalClock').innerHTML = `${hours}:${minutes}:${seconds}`;
+  }
+
+  // ========== SAUDAÇÃO PERSONALIZADA (somente bom dia/tarde/noite) ==========
+  function updateGreeting() {
+    const now = new Date();
+    const hours = now.getHours();
+    let greetingText = '';
+    let emoji = '';
+
+    if (hours >= 5 && hours < 12) {
+      greetingText = 'Bom dia';
+      emoji = '🌅';
+    } else if (hours >= 12 && hours < 18) {
+      greetingText = 'Boa tarde';
+      emoji = '☀️';
+    } else {
+      greetingText = 'Boa noite';
+      emoji = '🌙';
+    }
+    
+    document.getElementById('greeting').innerHTML = `${emoji} ${greetingText} ${emoji}`;
+  }
+
+  // ========== MODO DESCANSO COM NOME "OTACÍLIO" OCUPANDO O VISOR INTEIRO ==========
+  function activateIdleMode() {
+    if (isIdle) return;
+    
+    // salva o valor atual do display (se não for mensagem de erro)
+    const current = displayElem.innerText;
+    if (current !== 'Erro' && current !== '∞' && current !== '⚠️' && !current.includes('OTACÍLIO')) {
+      normalDisplayValue = current;
+    }
+    
+    // ativa o modo descanso - OTACÍLIO em uma única linha ocupando todo visor
+    displayElem.innerText = 'OTACÍLIO';
+    displayElem.classList.add('idle-mode');
+    isIdle = true;
+  }
+
+  function deactivateIdleMode() {
+    if (!isIdle) return;
+    
+    displayElem.classList.remove('idle-mode');
+    // restaura o valor anterior ou '0' se algo deu errado
+    if (normalDisplayValue && normalDisplayValue !== 'OTACÍLIO' && normalDisplayValue !== 'Erro') {
+      displayElem.innerText = normalDisplayValue;
+    } else {
+      displayElem.innerText = '0';
+      normalDisplayValue = '0';
+    }
+    isIdle = false;
+    resetIdleTimer();
+  }
+
+  function resetIdleTimer() {
+    if (idleTimeout) clearTimeout(idleTimeout);
+    if (!isIdle) {
+      idleTimeout = setTimeout(() => {
+        activateIdleMode();
+      }, IDLE_DELAY);
+    }
+  }
+
+  // função chamada em qualquer interação do usuário
+  function userInteraction() {
+    if (isIdle) {
+      deactivateIdleMode();
+    } else {
+      resetIdleTimer();
+    }
+  }
+
+  // ========== LÓGICA DA CALCULADORA SIMPLES ==========
+  function append(value) {
+    // se estiver em modo descanso, desativa primeiro
+    if (isIdle) deactivateIdleMode();
+    
+    let current = displayElem.innerText;
+    
+    // se o display mostra erro ou OTACÍLIO, reinicia
+    if (current === 'Erro' || current === 'OTACÍLIO' || current === '∞' || current === '⚠️') {
+      displayElem.innerText = '';
+      current = '';
+    }
+    
+    // substitui o '0' inicial
+    if (current === '0' && value !== '.') {
+      displayElem.innerText = value;
+      userInteraction();
+      return;
+    }
+    
+    // evita múltiplos operadores consecutivos
+    const lastChar = current.slice(-1);
+    const operators = ['+', '-', '*', '/'];
+    if (operators.includes(value) && operators.includes(lastChar)) {
+      // substitui o último operador pelo novo
+      displayElem.innerText = current.slice(0, -1) + value;
+      userInteraction();
+      return;
+    }
+    
+    // evita múltiplos pontos decimais no mesmo número
+    if (value === '.') {
+      const partes = current.split(/[\+\-\*\/]/);
+      const ultimoNumero = partes[partes.length - 1];
+      if (ultimoNumero.includes('.')) {
+        userInteraction();
+        return;
+      }
+    }
+    
+    displayElem.innerText += value;
+    userInteraction();
+  }
+
+  function clearDisplay() {
+    if (isIdle) deactivateIdleMode();
+    displayElem.innerText = '0';
+    normalDisplayValue = '0';
+    userInteraction();
+  }
+
+  function backspace() {
+    if (isIdle) deactivateIdleMode();
+    
+    let current = displayElem.innerText;
+    if (current === 'Erro' || current === 'OTACÍLIO' || current === '∞' || current === '⚠️') {
+      displayElem.innerText = '0';
+      normalDisplayValue = '0';
+    } else if (current.length === 1 || current === '0') {
+      displayElem.innerText = '0';
+    } else {
+      displayElem.innerText = current.slice(0, -1);
+      if (displayElem.innerText === '') displayElem.innerText = '0';
+    }
+    normalDisplayValue = displayElem.innerText;
+    userInteraction();
+  }
+
+  function calculate() {
+    if (isIdle) deactivateIdleMode();
+    
+    let expr = displayElem.innerText;
+    if (!expr || expr === 'Erro' || expr === 'OTACÍLIO' || expr === '∞') {
+      displayElem.innerText = '0';
+      normalDisplayValue = '0';
+      userInteraction();
+      return;
+    }
+    
+    // substitui símbolos visuais por operadores JS
+    let computable = expr.replace(/÷/g, '/').replace(/×/g, '*');
+    
+    // validação simples para evitar eval perigoso, mas apenas operações básicas
+    // permite apenas números, operadores, parênteses e ponto
+    if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(computable)) {
+      displayElem.innerText = 'Erro';
+      normalDisplayValue = 'Erro';
+      userInteraction();
+      return;
+    }
+    
+    try {
+      // usando Function ao invés de eval para maior segurança (mas ainda limitado a Math)
+      const result = new Function('return (' + computable + ')')();
+      
+      if (result === undefined || isNaN(result) || !isFinite(result)) {
+        displayElem.innerText = 'Erro';
+        normalDisplayValue = 'Erro';
+      } else {
+        // formata resultado: se inteiro mostra sem decimais, senão até 8 casas
+        let formatted;
+        if (Number.isInteger(result)) {
+          formatted = result.toString();
+        } else {
+          formatted = parseFloat(result.toFixed(8)).toString();
+          // remove trailing zeros
+          formatted = formatted.replace(/\.?0+$/, '');
+        }
+        displayElem.innerText = formatted;
+        normalDisplayValue = formatted;
+      }
+    } catch (error) {
+      displayElem.innerText = 'Erro';
+      normalDisplayValue = 'Erro';
+    }
+    userInteraction();
+  }
+
+  // ========== SUPORTE A TECLADO FÍSICO ==========
+  function handleKeyboard(e) {
+    const key = e.key;
+    const numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const operadores = ['+', '-', '*', '/'];
+    const controle = ['Enter', 'Backspace', 'Delete', 'Escape', '.'];
+    
+    if (numeros.includes(key) || operadores.includes(key) || controle.includes(key) || key === '.') {
+      e.preventDefault();
+    }
+    
+    // interação do usuário (desativa modo descanso)
+    userInteraction();
+    
+    if (numeros.includes(key)) {
+      append(key);
+    } else if (key === '.') {
+      append('.');
+    } else if (key === '+') {
+      append('+');
+    } else if (key === '-') {
+      append('-');
+    } else if (key === '*') {
+      append('*');
+    } else if (key === '/') {
+      append('/');
+    } else if (key === 'Enter') {
+      calculate();
+    } else if (key === 'Backspace') {
+      backspace();
+    } else if (key === 'Delete' || key === 'Escape') {
+      clearDisplay();
+    }
+  }
+
+  // ========== INICIALIZAÇÃO ==========
+  function init() {
+    updateDigitalClock();
+    updateGreeting();
+    
+    // atualiza relógio a cada segundo
+    setInterval(updateDigitalClock, 1000);
+    // atualiza saudação a cada segundo (para mudar exatamente na virada da hora)
+    setInterval(updateGreeting, 1000);
+    
+    document.addEventListener('keydown', handleKeyboard);
+    
+    // detecta cliques em qualquer botão para reset do timer
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', userInteraction);
+    });
+    displayElem.addEventListener('click', userInteraction);
+    
+    // inicia o timer de inatividade
+    resetIdleTimer();
+    
+    // mensagem de boas vindas no console
+    console.log('✨ Calculadora OTACÍLIO | Relógio digital | Modo descanso com nome em destaque ✨');
+  }
+  
+  // executa quando tudo estiver pronto
+  window.addEventListener('load', init);
+  
+  // expõe funções globalmente para os botões HTML
+  window.append = append;
+  window.clearDisplay = clearDisplay;
+  window.calculate = calculate;
+  window.backspace = backspace;
+</script>
+</body>
+</html>
